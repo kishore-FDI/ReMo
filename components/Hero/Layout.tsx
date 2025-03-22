@@ -7,11 +7,11 @@ const Layout = () => {
   const { data: session } = useSession();
 
   return (
-    <main className='flex min-h-screen flex-col'>
+    <main className='flex min-h-screen flex-col '>
       <Navbar isProfile={isProfile} setIsProfile={setIsProfile} />
       <section className='flex'>
         {/* Sidebar */}
-        <section className='flex w-[20rem] flex-col gap-4 p-4'>
+        <section className='flex w-[20rem] flex-col gap-4 p-4 text-white'>
           <a
             href='/whiteboard'
             // className='text-lg font-semibold hover:underline'

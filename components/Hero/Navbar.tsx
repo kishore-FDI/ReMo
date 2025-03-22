@@ -4,7 +4,7 @@ import Image from "next/image";
 const Navbar = ({ setIsProfile, isProfile }: any) => {
   const { data: session, status } = useSession();
   return (
-    <section className='m-4 mx-5 flex justify-between'>
+    <section className='flex justify-between bg-[#202731] p-4 px-5'>
       <img src='/favicon.ico'></img>
       <div>
         {session && (
