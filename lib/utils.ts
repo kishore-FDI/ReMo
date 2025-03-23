@@ -1,6 +1,6 @@
+import { type ClassValue, clsx } from "clsx";
 import jsPDF from "jspdf";
 import { twMerge } from "tailwind-merge";
-import { type ClassValue, clsx } from "clsx";
 
 const adjectives = [
   "Happy",
@@ -33,10 +33,6 @@ const animals = [
   "Panda",
   "Crocodile",
 ];
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export function generateRandomName(): string {
   const randomAdjective =
@@ -119,3 +115,7 @@ export const exportToPdf = () => {
   // download the pdf
   doc.save("canvas.pdf");
 };
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
