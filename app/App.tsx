@@ -227,7 +227,8 @@ const App = () => {
               enhanced productivity.
             </p>
             <div className='flex justify-center space-x-4'>
-              <motion.button
+              <motion.a
+                href='/home'
                 className='group relative overflow-hidden rounded-full bg-teal-400 px-8 py-4 font-medium text-[#202731]'
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -239,7 +240,7 @@ const App = () => {
                   whileHover={{ x: 0 }}
                   transition={{ type: "tween" }}
                 />
-              </motion.button>
+              </motion.a>
               {/* <motion.button
                 className='group relative overflow-hidden rounded-full border-2 border-teal-400 px-8 py-4 font-medium text-teal-400'
                 whileHover={{ scale: 1.05 }}
