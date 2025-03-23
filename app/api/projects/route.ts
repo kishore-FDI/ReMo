@@ -1,6 +1,31 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+interface ProjectMember {
+  id: string;
+  memberId: string;
+  name: string;
+  role: string;
+  email: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  completed: boolean;
+  dueDate: Date;
+  assignedTo: string;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string | null;
+  members: ProjectMember[];
+  tasks: Task[];
+}
+
 export async function GET() {
   try {
     const projects = await prisma.project.findMany({
@@ -9,7 +34,20 @@ export async function GET() {
         tasks: true,
       },
     });
-    return NextResponse.json(projects);
+
+    // Transform the projects to include member names in tasks
+    const transformedProjects = projects.map((project: Project) => ({
+      ...project,
+      tasks: project.tasks.map((task: Task) => ({
+        ...task,
+        assignedTo: {
+          memberId: task.assignedTo,
+          name: project.members.find((m: ProjectMember) => m.memberId === task.assignedTo)?.name || ''
+        }
+      }))
+    }));
+
+    return NextResponse.json(transformedProjects);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
   }
@@ -28,7 +66,20 @@ export async function POST(request: Request) {
         tasks: true,
       },
     });
-    return NextResponse.json(project);
+
+    // Transform the project to include member names in tasks
+    const transformedProject = {
+      ...project,
+      tasks: project.tasks.map((task: Task) => ({
+        ...task,
+        assignedTo: {
+          memberId: task.assignedTo,
+          name: project.members.find((m: ProjectMember) => m.memberId === task.assignedTo)?.name || ''
+        }
+      }))
+    };
+
+    return NextResponse.json(transformedProject);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }

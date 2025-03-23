@@ -33,10 +33,11 @@ export default function TaskPieChart({ tasks, memberColors }: TaskPieChartProps)
 
   // Group tasks by member
   const tasksByMember = tasks.reduce((acc, task) => {
-    const memberId = task.assignedTo.memberId;
+    console.log(task.assignedTo);
+    const memberId = task.assignedTo?.memberId;
     if (!acc[memberId]) {
       acc[memberId] = {
-        name: task.assignedTo.name,
+        name: task.assignedTo?.name,
         total: 0,
         completed: 0,
         incomplete: 0
@@ -59,10 +60,10 @@ export default function TaskPieChart({ tasks, memberColors }: TaskPieChartProps)
         label: 'Completed Tasks',
         data: Object.values(tasksByMember).map(data => data.completed),
         backgroundColor: Object.keys(tasksByMember).map(memberId => 
-          memberColors[memberId].replace('0.5', '0.8') // Darker shade for completed tasks
+          (memberColors[memberId] || memberColors.default).replace('0.5', '0.8') // Darker shade for completed tasks
         ),
         borderColor: Object.keys(tasksByMember).map(memberId => 
-          memberColors[memberId].replace('0.5', '1') // Solid border
+          (memberColors[memberId] || memberColors.default).replace('0.5', '1') // Solid border
         ),
         borderWidth: 1,
       },
@@ -70,10 +71,10 @@ export default function TaskPieChart({ tasks, memberColors }: TaskPieChartProps)
         label: 'Incomplete Tasks',
         data: Object.values(tasksByMember).map(data => data.incomplete),
         backgroundColor: Object.keys(tasksByMember).map(memberId => 
-          memberColors[memberId].replace('0.5', '0.3') // Lighter shade for incomplete tasks
+          (memberColors[memberId] || memberColors.default).replace('0.5', '0.3') // Lighter shade for incomplete tasks
         ),
         borderColor: Object.keys(tasksByMember).map(memberId => 
-          memberColors[memberId].replace('0.5', '1') // Solid border
+          (memberColors[memberId] || memberColors.default).replace('0.5', '1') // Solid border
         ),
         borderWidth: 1,
       }
