@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Plus, X, UserPlus, Link as LinkIcon, Pencil, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Plus, X, UserPlus, Link as LinkIcon, Pencil, Trash2, CheckCircle2, Circle, Archive } from 'lucide-react';
 import TaskPieChart from './components/TaskPieChart';
 
 interface Project {
@@ -78,7 +78,8 @@ export default function ProjectPage() {
       'rgba(249, 115, 22, 0.5)', // orange
     ];
     
-    const colorMap: { [key: string]: string } = {};
+    const defaultColor = 'rgba(156, 163, 175, 0.5)'; // gray as default
+    const colorMap: { [key: string]: string } = { default: defaultColor };
     selectedProject?.members.forEach((member, index) => {
       colorMap[member.memberId] = colors[index % colors.length];
     });
@@ -135,39 +136,81 @@ export default function ProjectPage() {
     if (!selectedProject) return;
     
     try {
+      console.log("Deleting member:", memberId);
       const response = await fetch(`/api/members?id=${memberId}`, {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        setSelectedProject({
-          ...selectedProject,
-          members: selectedProject.members.filter(member => member.memberId !== memberId),
-          tasks: selectedProject.tasks.filter(task => task.assignedTo.memberId !== memberId),
-        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(`Failed to delete member: ${response.statusText}`);
       }
+
+      const result = await response.json();
+      console.log("Delete result:", result);
+
+      setSelectedProject({
+        ...selectedProject,
+        members: selectedProject.members.filter(member => member.memberId !== memberId),
+        tasks: selectedProject.tasks.filter(task => task.assignedTo.memberId !== memberId),
+      });
     } catch (error) {
       console.error('Failed to delete member:', error);
     }
   };
 
   const addTask = async () => {
-    if (!selectedProject || !newTask.title.trim() || !newTask.assignedTo.memberId) return;
+    console.log("Adding new task:", newTask);
+    console.log("Selected project:", selectedProject);
+    
+    if (!selectedProject || !newTask.title.trim() || !newTask.assignedTo.memberId) {
+      console.log("Validation failed:", {
+        hasSelectedProject: !!selectedProject,
+        hasTitle: !!newTask.title.trim(),
+        hasAssignedTo: !!newTask.assignedTo.memberId
+      });
+      return;
+    }
 
     try {
+      const taskData = {
+        title: newTask.title,
+        description: newTask.description,
+        completed: false,
+        dueDate: newTask.dueDate,
+        assignedTo: newTask.assignedTo.memberId, // Send only the memberId
+        projectId: selectedProject.id,
+      };
+      console.log("Sending task data to API:", taskData);
+
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newTask,
-          projectId: selectedProject.id,
-        }),
+        body: JSON.stringify(taskData),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(`Failed to add task: ${response.statusText}`);
+      }
+
       const task = await response.json();
+      console.log("Received task from API:", task);
+
+      // Transform the task to match our frontend format
+      const frontendTask = {
+        ...task,
+        assignedTo: {
+          memberId: task.assignedTo,
+          name: selectedProject.members.find(m => m.memberId === task.assignedTo)?.name || ''
+        }
+      };
+
       setSelectedProject({
         ...selectedProject,
-        tasks: [...selectedProject.tasks, task],
+        tasks: [...selectedProject.tasks, frontendTask],
       });
 
       setShowTaskModal(false);
@@ -186,6 +229,13 @@ export default function ProjectPage() {
     if (!selectedProject || !editingMember || !newMember.name.trim()) return;
 
     try {
+      console.log("Updating member:", {
+        id: editingMember.memberId,
+        name: newMember.name,
+        role: newMember.role,
+        email: newMember.email,
+      });
+
       const response = await fetch('/api/members', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -197,12 +247,35 @@ export default function ProjectPage() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(`Failed to update member: ${errorData.error || response.statusText}`);
+      }
+
       const updatedMember = await response.json();
-      setSelectedProject({
-        ...selectedProject,
-        members: selectedProject.members.map(member =>
-          member.memberId === editingMember.memberId ? updatedMember : member
-        ),
+      console.log("Updated member:", updatedMember);
+
+      // Update the member in the project's members list and tasks
+      setSelectedProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          members: prev.members.map(member =>
+            member.memberId === editingMember.memberId ? updatedMember : member
+          ),
+          tasks: prev.tasks.map(task =>
+            task.assignedTo.memberId === editingMember.memberId
+              ? {
+                  ...task,
+                  assignedTo: {
+                    ...task.assignedTo,
+                    name: updatedMember.name
+                  }
+                }
+              : task
+          )
+        };
       });
 
       setShowMemberModal(false);
@@ -226,14 +299,30 @@ export default function ProjectPage() {
         }),
       });
 
-      if (response.ok) {
-        setSelectedProject({
-          ...selectedProject,
-          tasks: selectedProject.tasks.map(task =>
-            task.id === taskId ? { ...task, completed: !completed } : task
-          ),
-        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(`Failed to update task: ${response.statusText}`);
       }
+
+      const updatedTask = await response.json();
+      console.log("Updated task:", updatedTask);
+
+      // Transform the task to match our frontend format
+      const frontendTask = {
+        ...updatedTask,
+        assignedTo: {
+          memberId: updatedTask.assignedTo,
+          name: selectedProject.members.find(m => m.memberId === updatedTask.assignedTo)?.name || ''
+        }
+      };
+
+      setSelectedProject({
+        ...selectedProject,
+        tasks: selectedProject.tasks.map(task =>
+          task.id === taskId ? frontendTask : task
+        ),
+      });
     } catch (error) {
       console.error('Failed to update task:', error);
     }
@@ -256,6 +345,36 @@ export default function ProjectPage() {
     setInviteLink(link);
   };
 
+  const deleteTask = async (taskId: string, shouldArchive: boolean = false) => {
+    if (!selectedProject) return;
+
+    try {
+      const response = await fetch(`/api/tasks?id=${taskId}${shouldArchive ? '&archive=true' : ''}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(`Failed to ${shouldArchive ? 'archive' : 'delete'} task: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(`Task ${shouldArchive ? 'archived' : 'deleted'}:`, result);
+
+      // Update the UI
+      setSelectedProject({
+        ...selectedProject,
+        tasks: selectedProject.tasks.filter(task => task.id !== taskId)
+      });
+    } catch (error) {
+      console.error(`Failed to ${shouldArchive ? 'archive' : 'delete'} task:`, error);
+    }
+  };
+
+  useEffect(() => {
+    console.log(projects);
+  }, [projects]);
   return (
     <div className="flex h-screen bg-[#202731]">
       {/* Side Navigation */}
@@ -270,7 +389,7 @@ export default function ProjectPage() {
           </button>
         </div>
         <div className="p-2">
-          {projects.map(project => (
+          {projects?.map(project => (
             <div
               key={project.id}
               onClick={() => setSelectedProject(project)}
@@ -283,6 +402,7 @@ export default function ProjectPage() {
               {project.title}
             </div>
           ))}
+          
         </div>
       </div>
 
@@ -346,10 +466,11 @@ export default function ProjectPage() {
                       <th className="p-4">Description</th>
                       <th className="p-4">Assigned To</th>
                       <th className="p-4">Due Date</th>
+                      <th className="p-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedProject.tasks.map(task => (
+                    {selectedProject.tasks?.map(task => (
                       <tr key={task.id} className="border-t border-gray-700">
                         <td className="p-4">
                           <button
@@ -368,14 +489,36 @@ export default function ProjectPage() {
                         <td className="p-4">
                           <div 
                             className="inline-flex items-center px-2 py-1 rounded"
-                            style={{ backgroundColor: memberColors[task.assignedTo.memberId] }}
+                            style={{ backgroundColor: memberColors[task.assignedTo?.memberId] || memberColors.default }}
                           >
                             <span className="text-white">
-                              {task.assignedTo.name} ({task.assignedTo.memberId})
+                              {task.assignedTo?.name} ({task.assignedTo?.memberId})
                             </span>
                           </div>
                         </td>
                         <td className="p-4 text-gray-400">{new Date(task.dueDate).toLocaleDateString()}</td>
+                        <td className="p-4">
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={() => deleteTask(task.id, true)}
+                              className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                              title="Archive Task"
+                            >
+                              <Archive size={16} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+                                  deleteTask(task.id);
+                                }
+                              }}
+                              className="text-red-400 hover:text-red-300 transition-colors"
+                              title="Delete Task"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
