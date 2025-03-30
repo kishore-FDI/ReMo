@@ -332,8 +332,9 @@ const App = () => {
                   Transform Your Workspace
                 </h2>
                 <p className='mb-8 text-lg text-gray-400'>
-                  ReMo is more than just a virtual workspace - it's a complete
-                  solution for modern teams. With our platform, you can:
+                  ReMo is more than just a virtual workspace - it&apos;s a
+                  complete solution for modern teams. With our platform, you
+                  can:
                 </p>
                 <ul className='space-y-4'>
                   {[
