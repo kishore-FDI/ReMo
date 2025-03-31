@@ -16,9 +16,14 @@ import {
   FaDumpsterFire,
 } from "react-icons/fa";
 import { SignedOut, SignOutButton } from "@clerk/nextjs";
+import { useCompany } from "@/context/CompanyContext";
 
 const Layout = ({ user }: any) => {
   const [isProfile, setIsProfile] = useState(false);
+  const { selectedCompany, setSelectedCompany } = useCompany();
+  useEffect(() => {
+    console.log(selectedCompany);
+  }, []);
   useEffect(() => {
     console.log(user);
   }, []);
@@ -138,6 +143,7 @@ const Layout = ({ user }: any) => {
                         SignOut
                       </span>
                     </SignOutButton>
+                    {selectedCompany && selectedCompany.name}
                   </div>
                 </div>
               </motion.div>

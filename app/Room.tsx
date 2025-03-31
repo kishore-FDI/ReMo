@@ -5,6 +5,7 @@ import { ClientSideSuspense } from "@liveblocks/react";
 
 import Loader from "@/components/Loader";
 import { RoomProvider } from "@/liveblocks.config";
+import { CompanyProvider } from "@/context/CompanyContext";
 
 const Room = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -20,7 +21,7 @@ const Room = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <ClientSideSuspense fallback={<Loader />}>
-        {() => children}
+        {() => <CompanyProvider>{children}</CompanyProvider>}
       </ClientSideSuspense>
     </RoomProvider>
   );

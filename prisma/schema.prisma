@@ -9,64 +9,73 @@ datasource db {
 }
 
 model User {
-  id            String          @id
-  name          String
-  email         String          @unique
-  CompanyMember CompanyMember[]
+  id                 String          @id
+  name               String
+  email              String          @unique
+  companiesOwned     Company[]       @relation("CompanyOwner")
+  companyMemberships CompanyMember[]
+  projectMemberships ProjectMember[]
+  assignedTasks      Task[]
+  userBlog           Json? // ✅ JSON blog storage for user
+}
+
+model Company {
+  id         String          @id @default(uuid())
+  name       String          @unique
+  ownerId    String
+  owner      User            @relation(fields: [ownerId], references: [id], onDelete: Cascade, name: "CompanyOwner")
+  members    CompanyMember[]
+  projects   Project[]
+  inviteCode String?          @unique @default(nanoid(10)) // Changed from optional to required with default generation
+  createdAt  DateTime        @default(now())
+}
+
+model CompanyMember {
+  id        String  @id @default(uuid())
+  userId    String
+  companyId String
+  user      User    @relation(fields: [userId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
+  role      String  @default("member") // "owner", "admin", "member"
+
+  @@unique([userId, companyId])
 }
 
 model Project {
   id          String          @id @default(uuid())
   title       String
   description String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  companyId   String
+  company     Company         @relation(fields: [companyId], references: [id])
   members     ProjectMember[]
   tasks       Task[]
+  projectBlog Json? // ✅ JSON blog storage for project
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model ProjectMember {
-  id        String   @id @default(uuid())
-  memberId  String
-  name      String
-  role      String
-  email     String
+  id        String  @id @default(uuid())
+  userId    String
   projectId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  project   Project  @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
+  role      String  @default("member") // "owner", "admin", "member"
 
-  @@unique([projectId, memberId])
+  @@unique([projectId, userId])
 }
 
 model Task {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
-  completed   Boolean  @default(false)
-  dueDate     DateTime
+  completed   Boolean   @default(false)
+  dueDate     DateTime?
   assignedTo  String
+  assignee    User      @relation(fields: [assignedTo], references: [id])
   projectId   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  archived    Boolean  @default(false)
-  project     Project  @relation(fields: [projectId], references: [id])
-}
-
-model Company {
-  id            String          @id @default(uuid())
-  name          String          @unique
-  createdAt     DateTime        @default(now())
-  CompanyMember CompanyMember[]
-}
-
-model CompanyMember {
-  id        String   @id @default(uuid())
-  userId    String
-  companyId String
-  createdAt DateTime @default(now())
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, companyId])
+  project     Project   @relation(fields: [projectId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  archived    Boolean   @default(false)
 }

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Layout from "@/components/Hero/Layout";
 
 const App = () => {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const App = () => {
   if (isSignedIn) {
     return (
       <>
-        <Layout />
+        <Layout user={user} />
       </>
     );
   }
