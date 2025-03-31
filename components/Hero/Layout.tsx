@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useSession } from "next-auth/react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { motion } from "framer-motion";
 import {
@@ -13,12 +12,16 @@ import {
   FaChartLine,
   FaUsers,
   FaProjectDiagram,
+  FaDumpster,
+  FaDumpsterFire,
 } from "react-icons/fa";
+import { SignedOut, SignOutButton } from "@clerk/nextjs";
 
-const Layout = () => {
+const Layout = ({ user }: any) => {
   const [isProfile, setIsProfile] = useState(false);
-  const { data: session } = useSession();
-
+  useEffect(() => {
+    console.log(user);
+  }, []);
   const navItems = [
     {
       title: "Whiteboard",
@@ -65,7 +68,7 @@ const Layout = () => {
 
   return (
     <main className='flex min-h-screen flex-col bg-[#202731]'>
-      <Navbar isProfile={isProfile} setIsProfile={setIsProfile} />
+      <Navbar isProfile={isProfile} setIsProfile={setIsProfile} user={user} />
 
       {/* Hero Section */}
 
@@ -106,25 +109,35 @@ const Layout = () => {
               >
                 <div className='flex items-center space-x-6'>
                   <img
-                    src={session?.user?.image || "/default-avatar.png"}
+                    src={user?.imageUrl || "/default-avatar.png"}
                     alt='User Avatar'
                     className='h-24 w-24 rounded-full border-2 border-blue-500'
                   />
                   <div>
                     <h2 className='text-2xl font-bold text-white'>
-                      {session?.user?.name}
+                      {user?.firstName}
                     </h2>
-                    <p className='text-gray-300'>{session?.user?.email}</p>
+                    <h2 className='text-2xl font-bold text-white'>
+                      {user?.lastName}
+                    </h2>
+                    <p className='text-gray-300'>
+                      {user?.primaryEmailAddress?.emailAddress}
+                    </p>
                     <div className='mt-2 flex items-center space-x-4 text-sm text-gray-400'>
                       <span className='flex items-center'>
                         <FaCalendarAlt className='mr-2' />
-                        Member since Jan 2024
-                      </span>
-                      <span className='flex items-center'>
-                        <FaEnvelope className='mr-2' />
-                        {session?.user?.email}
+                        Last logged in{" "}
+                        {user?.lastSignInAt
+                          ? new Date(user.lastSignInAt).toLocaleString()
+                          : ""}
                       </span>
                     </div>
+                    <SignOutButton>
+                      <span className='flex  cursor-pointer text-red-500'>
+                        <FaDumpsterFire className='mr-2 mt-0.5 size-6' />
+                        SignOut
+                      </span>
+                    </SignOutButton>
                   </div>
                 </div>
               </motion.div>

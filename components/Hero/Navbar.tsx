@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import motion from "framer-motion";
-const Navbar = ({ setIsProfile, isProfile }: any) => {
-  const { data: session, status } = useSession();
+const Navbar = ({ setIsProfile, isProfile, user }: any) => {
   return (
     <section className='flex justify-between bg-[#2a3441] p-4 px-5'>
       <img src='/favicon.ico' className='h-12'></img>
@@ -11,10 +9,10 @@ const Navbar = ({ setIsProfile, isProfile }: any) => {
         <div>ReMo</div>
       </section>
       <div>
-        {session && (
+        {user && (
           <button onClick={() => setIsProfile(!isProfile)}>
             <Image
-              src={session?.user.image}
+              src={user?.imageUrl}
               width={40}
               height={40}
               className=' rounded-full'

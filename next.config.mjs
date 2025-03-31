@@ -10,15 +10,17 @@ const nextConfig = {
     return config;
   },
   images: {
+    domains: ["img.clerk.com"],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "liveblocks.io",
         port: "",
-      },{
+      },
+      {
         protocol: "https",
-        hostname:"lh3.googleusercontent.com"
-      }
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
   typescript: {

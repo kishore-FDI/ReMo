@@ -36,11 +36,11 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
           },
         }}
       >
-        <AuthProvider>
-          <Room>
-            <TooltipProvider>{children}</TooltipProvider>
-          </Room>
-        </AuthProvider>
+        {/* <AuthProvider> */}
+        <Room>
+          <TooltipProvider>{children}</TooltipProvider>
+        </Room>
+        {/* </AuthProvider> */}
       </ClerkProvider>
     </body>
   </html>

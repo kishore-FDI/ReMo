@@ -5,10 +5,8 @@ import { ClientSideSuspense } from "@liveblocks/react";
 
 import Loader from "@/components/Loader";
 import { RoomProvider } from "@/liveblocks.config";
-import { useSession } from "next-auth/react";
 
 const Room = ({ children }: { children: React.ReactNode }) => {
-  const { data: session, status } = useSession();
   return (
     <RoomProvider
       id='fig'

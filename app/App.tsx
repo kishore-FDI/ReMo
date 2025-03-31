@@ -205,7 +205,7 @@ const App = () => {
       </div>
     );
   } else {
-    return <Layout />;
+    return <Layout user={user} />;
   }
 };
 
