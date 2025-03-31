@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import * as THREE from "three";
 import { useUser } from "@clerk/nextjs";
 import Layout from "@/components/Hero/Layout";
+import Companies from "@/components/companies/Companies";
 
 const App = () => {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -205,7 +206,7 @@ const App = () => {
       </div>
     );
   } else {
-    return <Layout user={user} />;
+    return <Companies user={user} />;
   }
 };
 
