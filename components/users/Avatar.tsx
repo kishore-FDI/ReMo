@@ -6,7 +6,7 @@ type Props = {
   otherStyles?: string;
 };
 
-const Avatar = ({ name, otherStyles, session }: any) => (
+const Avatar = ({ name, otherStyles, user }: any) => (
   <>
     <Tooltip>
       <TooltipTrigger>
@@ -16,7 +16,7 @@ const Avatar = ({ name, otherStyles, session }: any) => (
         >
           <Image
             // src={`https://liveblocks.io/avatars/avatar-${Math.floor(Math.random() * 30)}.png`}
-            src={session?.user.image}
+            src={user?.imageUrl}
             fill
             className='rounded-full'
             alt={name}

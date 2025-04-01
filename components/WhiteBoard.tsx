@@ -23,8 +23,8 @@ import { LeftSidebar, Live, Navbar, RightSidebar } from "@/components/index";
 import { handleImageUpload } from "@/lib/shapes";
 import { defaultNavElement } from "@/constants";
 import { ActiveElement, Attributes } from "@/types/type";
-
-const Home = () => {
+import useUser from "@clerk/nextjs";
+const Home = ({ user }: any) => {
   /**
    * useUndo and useRedo are hooks provided by Liveblocks that allow you to
    * undo and redo mutations.
@@ -491,6 +491,7 @@ const Home = () => {
   return (
     <main className='h-screen overflow-hidden'>
       <Navbar
+        user={user}
         imageInputRef={imageInputRef}
         activeElement={activeElement}
         handleImageUpload={(e: any) => {

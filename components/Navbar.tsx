@@ -16,7 +16,8 @@ const Navbar = ({
   imageInputRef,
   handleImageUpload,
   handleActiveElement,
-}: NavbarProps) => {
+  user,
+}: any) => {
   const isActive = (value: string | Array<ActiveElement>) =>
     (activeElement && activeElement.value === value) ||
     (Array.isArray(value) &&
@@ -73,7 +74,7 @@ const Navbar = ({
         ))}
       </ul>
 
-      <ActiveUsers />
+      <ActiveUsers user={user} />
     </nav>
   );
 };

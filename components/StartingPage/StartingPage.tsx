@@ -13,7 +13,7 @@ import {
   FiArrowRight,
   FiGlobe,
 } from "react-icons/fi";
-import { useCompany } from "../../context/CompanyContext";
+import { useApp } from "../../context/CompanyContext";
 import { motion } from "framer-motion";
 
 interface Company {
@@ -23,7 +23,8 @@ interface Company {
   createdAt: string;
 }
 
-const Companies = ({ user }: any) => {
+const StartingPage = ({ user }: any) => {
+  const [userSettings, setUserSettings] = useState(false);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -39,7 +40,7 @@ const Companies = ({ user }: any) => {
   } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const { setSelectedCompany } = useCompany();
+  const { setSelectedCompany } = useApp();
   const router = useRouter();
 
   useEffect(() => {
@@ -162,7 +163,11 @@ const Companies = ({ user }: any) => {
 
   return (
     <div className='min-h-screen bg-[#1c212b]'>
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        setUserSettings={setUserSettings}
+        userSettings={userSettings}
+      />
 
       <div className='container mx-auto max-w-7xl px-4 py-12'>
         {/* Welcome Header */}
@@ -479,4 +484,4 @@ const Companies = ({ user }: any) => {
   );
 };
 
-export default Companies;
+export default StartingPage;
